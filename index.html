@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>SSN WA Chat Overlay</title>
+
+<script src="https://cdn.jsdelivr.net/gh/steveseguin/social_stream@latest/socialstream.js"></script>
+
+<style>
+  body {
+    margin: 0;
+    background: transparent;
+    overflow: hidden;
+    font-family: "Segoe UI", Arial, sans-serif;
+  }
+
+  #chat-area {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    width: 460px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .chat {
+    display: flex;
+    gap: 10px;
+    animation: slideUp 0.4s ease-out;
+  }
+
+  .avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #bbb;
+  }
+
+  .bubble {
+    background: #dcf8c6;
+    border-radius: 14px;
+    padding: 8px 12px;
+    max-width: 360px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  }
+
+  .user {
+    font-weight: 600;
+    font-size: 13px;
+    color: #075e54;
+    margin-bottom: 4px;
+  }
+
+  .text {
+    font-size: 15px;
+    color: #000;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+</style>
+</head>
+
+<body>
+
+<div id="chat-area"></div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const session = params.get("session");
+
+if (!session) {
+  document.body.innerHTML = "<h2 style='color:red'>SESSION TIDAK ADA</h2>";
+  throw new Error("No session");
+}
+
+const chatArea = document.getElementById("chat-area");
+
+SocialStream.init({
+  session: session,
+  instance: "wa-chat-safe",
+  onEvent: function (event) {
+    if (event.type !== "chat") return;
+
+    const data = event.data || {};
+
+    const name = data.displayName || "User";
+    const text = data.text || "";
+
+    let avatar = "";
+    if (typeof data.profileImage === "string") {
+      avatar = data.profileImage;
+    } else if (typeof data.avatar === "string") {
+      avatar = data.avatar;
+    } else {
+      avatar = "https://i.imgur.com/6VBx3io.png";
+    }
+
+    addChat(name, text, avatar);
+  }
+});
+
+function addChat(name, text, avatarUrl) {
+  const chat = document.createElement("div");
+  chat.className = "chat";
+
+  chat.innerHTML = `
+    <img class="avatar" src="${avatarUrl}">
+    <div class="bubble">
+      <div class="user">${name}</div>
+      <div class="text">${text}</div>
+    </div>
+  `;
+
+  chatArea.appendChild(chat);
+
+  if (chatArea.children.length > 5) {
+    chatArea.removeChild(chatArea.children[0]);
+  }
+
+  setTimeout(() => chat.remove(), 9000);
+}
+console.log("JS JALAN");
+fetch("https://google.com").then(()=>console.log("INTERNET OK"));
+</script>
+
+</body>
+</html>
