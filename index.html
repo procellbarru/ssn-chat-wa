@@ -39,7 +39,7 @@ body {
 .name {
   font-weight: bold;
   font-size: 14px;
-  color: #075E54; /* warna WA */
+  color: #075E54;
 }
 
 .text {
@@ -58,20 +58,21 @@ body {
 
 <div id="chat"></div>
 
-<!-- Social Stream Ninja -->
-<script src="https://socialstream.ninja/libs/socialstream.js"></script>
-
 <script>
 const chatBox = document.getElementById("chat");
 
-// listener resmi Social Stream Ninja
-document.addEventListener("onEventReceived", function (event) {
-  if (!event.detail || !event.detail.listener) return;
+/**
+ * EVENT RESMI OVERLAY SSN
+ * WAJIB pakai window.addEventListener
+ */
+window.addEventListener("onEventReceived", function (event) {
+  const detail = event.detail;
+  if (!detail) return;
 
-  // hanya ambil chat message
-  if (event.detail.listener !== "message") return;
+  if (detail.listener !== "message") return;
 
-  const data = event.detail.event;
+  const data = detail.event;
+  if (!data || !data.message) return;
 
   const msg = document.createElement("div");
   msg.className = "message";
@@ -80,13 +81,12 @@ document.addEventListener("onEventReceived", function (event) {
     <img class="avatar" src="${data.avatar || ''}">
     <div>
       <div class="name">${data.username || 'User'}</div>
-      <div class="text">${data.message || ''}</div>
+      <div class="text">${data.message}</div>
     </div>
   `;
 
   chatBox.appendChild(msg);
 
-  // auto hapus setelah 15 detik
   setTimeout(() => {
     msg.remove();
   }, 15000);
